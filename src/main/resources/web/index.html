@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-theme="light">
+    <!-- Main App Container -->
+    <div class="app-layout">
+        <!-- Top Navigation -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h1 class="brand-title">Student Management System</h1>
+                    <p class="brand-subtitle">Powered by Core Java & MySQL</p>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <div class="status-indicator" id="systemStatus" title="Database Connection Status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">MySQL Connected</span>
+                </div>
+
+                <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Dark/Light Mode">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+
+                <button class="btn btn-primary" id="openAddModalBtn">
+                    <i class="fa-solid fa-user-plus"></i> Add Student
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="app-main">
+            <!-- Analytics Overview Cards -->
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon bg-indigo">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Total Students</span>
+                        <h2 class="stat-value" id="statTotalStudents">0</h2>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon bg-emerald">
+                        <i class="fa-solid fa-user-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Active Students</span>
+                        <h2 class="stat-value text-emerald" id="statActiveStudents">0</h2>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon bg-amber">
+                        <i class="fa-solid fa-user-xmark"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Inactive Students</span>
+                        <h2 class="stat-value text-amber" id="statInactiveStudents">0</h2>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon bg-purple">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Average GPA</span>
+                        <h2 class="stat-value text-purple" id="statAvgGpa">0.00</h2>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Table & Toolbar Card -->
+            <section class="table-section">
+                <!-- Toolbar with Search and Filters -->
+                <div class="toolbar-header">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="searchInput" placeholder="Search by name, roll no, email, city...">
+                        <button id="clearSearchBtn" class="clear-input-btn" style="display: none;">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <div class="filter-group">
+                        <div class="select-wrapper">
+                            <select id="courseFilter">
+                                <option value="all">All Courses</option>
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Artificial Intelligence">Artificial Intelligence</option>
+                                <option value="Data Science">Data Science</option>
+                                <option value="Information Technology">Information Technology</option>
+                                <option value="Cyber Security">Cyber Security</option>
+                                <option value="Electronics">Electronics</option>
+                            </select>
+                        </div>
+
+                        <div class="select-wrapper">
+                            <select id="statusFilter">
+                                <option value="all">All Status</option>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+
+                        <button class="btn btn-outline" id="exportCsvBtn" title="Export current list to CSV">
+                            <i class="fa-solid fa-file-csv"></i> Export CSV
+                        </button>
+
+                        <button class="btn btn-icon" id="refreshBtn" title="Refresh Table">
+                            <i class="fa-solid fa-rotate-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Table Container -->
+                <div class="table-container">
+                    <table class="data-table" id="studentsTable">
+                        <thead>
+                            <tr>
+                                <th>Roll Number</th>
+                                <th>Student Name</th>
+                                <th>Contact</th>
+                                <th>Course</th>
+                                <th>Year</th>
+                                <th>GPA</th>
+                                <th>City</th>
+                                <th>Status</th>
+                                <th class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody">
+                            <!-- Populated dynamically via app.js -->
+                            <tr>
+                                <td colspan="9" class="loading-state">
+                                    <div class="spinner"></div>
+                                    <p>Loading students from database...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Table Footer -->
+                <div class="table-footer">
+                    <div class="records-count" id="recordsCount">Showing 0 students</div>
+                    <div class="table-tip">💡 Click on any student row or action to view, edit, or delete</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal: Add / Edit Student -->
+    <div class="modal-backdrop" id="studentModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">
+                    <i class="fa-solid fa-user-plus"></i> Add New Student
+                </h3>
+                <button class="close-modal-btn" id="closeModalBtn">&times;</button>
+            </div>
+            <form id="studentForm">
+                <input type="hidden" id="studentId">
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="rollNumber">Roll Number <span class="required">*</span></label>
+                            <input type="text" id="rollNumber" placeholder="e.g. SMS2026-015" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gender">Gender <span class="required">*</span></label>
+                            <select id="gender" required>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="firstName">First Name <span class="required">*</span></label>
+                            <input type="text" id="firstName" placeholder="First name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="lastName">Last Name <span class="required">*</span></label>
+                            <input type="text" id="lastName" placeholder="Last name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email Address <span class="required">*</span></label>
+                            <input type="email" id="email" placeholder="student@example.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">Phone Number <span class="required">*</span></label>
+                            <input type="tel" id="phone" placeholder="10-digit number" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="course">Course / Department <span class="required">*</span></label>
+                            <select id="course" required>
+                                <option value="" disabled selected>Select Course</option>
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Artificial Intelligence">Artificial Intelligence</option>
+                                <option value="Data Science">Data Science</option>
+                                <option value="Information Technology">Information Technology</option>
+                                <option value="Cyber Security">Cyber Security</option>
+                                <option value="Electronics">Electronics</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="yearLevel">Year Level <span class="required">*</span></label>
+                            <select id="yearLevel" required>
+                                <option value="1">Year 1 (Freshman)</option>
+                                <option value="2">Year 2 (Sophomore)</option>
+                                <option value="3" selected>Year 3 (Junior)</option>
+                                <option value="4">Year 4 (Senior)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gpa">GPA (0.00 - 4.00) <span class="required">*</span></label>
+                            <input type="number" id="gpa" step="0.01" min="0" max="4.00" value="3.50" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="city">City / Location <span class="required">*</span></label>
+                            <input type="text" id="city" placeholder="e.g. Hyderabad" required>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="status">Enrollment Status <span class="required">*</span></label>
+                            <select id="status" required>
+                                <option value="Active" selected>Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancelModalBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveStudentBtn">
+                        <i class="fa-solid fa-check"></i> Save Student
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: View Student Details -->
+    <div class="modal-backdrop" id="viewModal">
+        <div class="modal-dialog modal-md">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fa-solid fa-id-card"></i> Student Profile
+                </h3>
+                <button class="close-modal-btn" id="closeViewModalBtn">&times;</button>
+            </div>
+            <div class="modal-body" id="viewModalBody">
+                <!-- Dynamically filled by app.js -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="closeViewModalFooterBtn">Close</button>
+                <button type="button" class="btn btn-primary" id="editFromViewBtn">
+                    <i class="fa-solid fa-pen-to-square"></i> Edit Student
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Confirm Delete -->
+    <div class="modal-backdrop" id="deleteModal">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-header">
+                <h3 class="modal-title text-danger">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Delete Student
+                </h3>
+                <button class="close-modal-btn" id="closeDeleteModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to permanently delete this student record?</p>
+                <div class="delete-student-preview" id="deleteStudentPreview"></div>
+                <p class="text-muted text-sm mt-2">This action cannot be undone in the database.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fa-solid fa-trash-can"></i> Yes, Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Toast Notification Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Custom Script -->
+    <script src="js/app.js"></script>
+</body>
+</html>
